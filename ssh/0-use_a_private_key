@@ -1,5 +1,4 @@
-#!/bin/bash
-# File: 0-use_a_private_key
+#!/usr/bin/env bash
 # Connects to the server using the private key ~/.ssh/school
 
 ssh -i ~/.ssh/school ubuntu@server01
