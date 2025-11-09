@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
-# This script installs and configures Nginx to serve a page with "Holberton School"
+# This script installs and configures Nginx to serve a page containing 'Holberton School'
 
-# Update package lists and install nginx
-sudo apt-get update -y
-sudo apt-get install nginx -y
+# Update package lists
+apt-get update -y
 
-# Ensure Nginx is running
-sudo service nginx start
+# Install nginx
+apt-get install nginx -y
 
-# Replace the default index page content with "Holberton School"
-echo "Holberton School" | sudo tee /var/www/html/index.html > /dev/null
+# Start nginx (without using systemctl)
+service nginx start
 
-# Restart Nginx to apply changes
-sudo service nginx restart
+# Create a custom index page with the required text
+echo "Holberton School for the win!" > /var/www/html/index.nginx-debian.html
+echo "Holberton School for the win!" > /var/www/html/index.html
+
+# Restart nginx to apply changes
+service nginx restart
