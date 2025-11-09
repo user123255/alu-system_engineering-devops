@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Install and configure Nginx to display "Holberton School for the win!" on the root page
+# Install and configure Nginx to display "Holberton School" on the root page
 
 # Update package list and install nginx
 apt-get update -y
 apt-get install -y nginx
 
-# Replace the default index page with the required text
-echo "Holberton School for the win!" > /var/www/html/index.html
+# Create index page with the exact required text
+echo "Holberton School" > /var/www/html/index.html
 
-# Ensure Nginx is running
+# Start nginx using service (not systemctl)
 service nginx start
