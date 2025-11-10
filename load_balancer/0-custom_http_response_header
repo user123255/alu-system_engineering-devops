@@ -1,37 +1,54 @@
 #!/usr/bin/env bash
-# This script installs and configures Nginx to include a custom HTTP header 'X-Served-By'.
-# The header value is set to the server's hostname.
+# Debugging version to fix X-Served-By header
 
-# Update package list and install nginx
 sudo apt-get update -y
-sudo apt-get install -y nginx
+sudo apt-get install -y nginx curl
 
-# Get the server's hostname
-HOSTNAME=$(hostname)
+# Completely reset nginx configuration
+sudo systemctl stop nginx
 
-# Add the custom header to Nginx configuration
-sudo bash -c "cat > /etc/nginx/sites-available/default << EOF
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+# Create a minimal, clean configuration
+sudo bash -c "cat > /etc/nginx/nginx.conf << 'EOF'
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
 
-    root /var/www/html;
-    index index.html index.htm index.nginx-debian.html;
+events {
+    worker_connections 768;
+}
 
-    server_name _;
+http {
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
 
-    add_header X-Served-By \"$HOSTNAME\";  # Set the custom header with the hostname
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
 
-    location / {
-        try_files \$uri \$uri/ =404;
+    server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        
+        root /var/www/html;
+        index index.html index.htm;
+        
+        server_name _;
+        
+        location / {
+            add_header X-Served-By web-62 always;
+            try_files \$uri \$uri/ =404;
+        }
     }
 }
 EOF"
 
-# Create a symbolic link to enable the site (if not already done)
-sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/ 2>/dev/null || true
+# Test and start
+sudo nginx -t && sudo systemctl start nginx
 
-# Restart nginx to apply changes
-sudo systemctl restart nginx
-
-# Note: Ensure that this script is run on both web-01 and web-02
+# Comprehensive test
+echo "=== Testing Headers ==="
+curl -I http://localhost/
+echo "=== X-Served-By Header ==="
+curl -I http://localhost/ | grep -i "x-served-by"
