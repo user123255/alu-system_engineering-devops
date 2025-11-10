@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# This script installs and configures Nginx to include a custom HTTP header 'X-Served-By'
+# This script installs and configures Nginx to include a custom HTTP header 'X-Served-By'.
 # The header value is set to the server's hostname.
 
 # Update package list and install nginx
@@ -20,7 +20,7 @@ server {
 
     server_name _;
 
-    add_header X-Served-By \$hostname;
+    add_header X-Served-By \"$HOSTNAME\";  # Set the custom header with the hostname
 
     location / {
         try_files \$uri \$uri/ =404;
@@ -28,5 +28,10 @@ server {
 }
 EOF"
 
+# Create a symbolic link to enable the site (if not already done)
+sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/ 2>/dev/null || true
+
 # Restart nginx to apply changes
 sudo systemctl restart nginx
+
+# Note: Ensure that this script is run on both web-01 and web-02
