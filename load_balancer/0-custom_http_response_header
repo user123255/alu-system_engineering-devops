@@ -1,54 +1,46 @@
 #!/usr/bin/env bash
-# Debugging version to fix X-Served-By header
+# This script configures a new Ubuntu machine to serve HTTP traffic with a custom header
+# The custom header X-Served-By will contain the server's hostname
 
+# Update package list and install nginx
 sudo apt-get update -y
-sudo apt-get install -y nginx curl
+sudo apt-get install -y nginx
 
-# Completely reset nginx configuration
-sudo systemctl stop nginx
+# Configure Nginx to include the custom header with the server's hostname
+CONFIG_FILE="/etc/nginx/sites-available/default"
 
-# Create a minimal, clean configuration
-sudo bash -c "cat > /etc/nginx/nginx.conf << 'EOF'
-user www-data;
-worker_processes auto;
-pid /run/nginx.pid;
+# Check if the default file exists and backup if it does
+if [ -f "$CONFIG_FILE" ]; then
+    sudo cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
+fi
 
-events {
-    worker_connections 768;
-}
+# Create new configuration with custom header
+sudo bash -c "cat > $CONFIG_FILE << 'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
 
-http {
-    sendfile on;
-    tcp_nopush on;
-    tcp_nodelay on;
-    keepalive_timeout 65;
-    types_hash_max_size 2048;
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
 
-    include /etc/nginx/mime.types;
-    default_type application/octet-stream;
+    server_name _;
 
-    server {
-        listen 80 default_server;
-        listen [::]:80 default_server;
-        
-        root /var/www/html;
-        index index.html index.htm;
-        
-        server_name _;
-        
-        location / {
-            add_header X-Served-By web-62 always;
-            try_files \$uri \$uri/ =404;
-        }
+    location / {
+        # Add custom header with server hostname
+        add_header X-Served-By \$hostname always;
+        try_files \$uri \$uri/ =404;
     }
 }
 EOF"
 
-# Test and start
-sudo nginx -t && sudo systemctl start nginx
+# Ensure the site is enabled
+sudo ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
 
-# Comprehensive test
-echo "=== Testing Headers ==="
-curl -I http://localhost/
-echo "=== X-Served-By Header ==="
-curl -I http://localhost/ | grep -i "x-served-by"
+# Test Nginx configuration
+sudo nginx -t
+
+# Restart Nginx to apply changes
+sudo systemctl restart nginx
+
+# Enable Nginx to start on boot
+sudo systemctl enable nginx
