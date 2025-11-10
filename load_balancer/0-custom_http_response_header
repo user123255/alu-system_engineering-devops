@@ -1,48 +1,32 @@
 #!/usr/bin/env bash
-# This script installs and configures HAProxy as a load balancer on Ubuntu
+# This script installs and configures Nginx to include a custom HTTP header 'X-Served-By'
+# The header value is set to the server's hostname.
 
-# Update and install haproxy
+# Update package list and install nginx
 sudo apt-get update -y
-sudo apt-get install -y haproxy
+sudo apt-get install -y nginx
 
-# Enable HAProxy service to start on boot
-sudo systemctl enable haproxy
+# Get the server's hostname
+HOSTNAME=$(hostname)
 
-# Backup the default HAProxy config file
-sudo cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
+# Add the custom header to Nginx configuration
+sudo bash -c "cat > /etc/nginx/sites-available/default << EOF
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
 
-# Configure HAProxy to balance between web-01 and web-02 using roundrobin
-sudo bash -c 'cat > /etc/haproxy/haproxy.cfg << EOF
-global
-    log /dev/log    local0
-    log /dev/log    local1 notice
-    daemon
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
 
-defaults
-    log     global
-    mode    http
-    option  httplog
-    option  dontlognull
-    timeout connect 5000
-    timeout client  50000
-    timeout server  50000
-    errorfile 400 /etc/haproxy/errors/400.http
-    errorfile 403 /etc/haproxy/errors/403.http
-    errorfile 408 /etc/haproxy/errors/408.http
-    errorfile 500 /etc/haproxy/errors/500.http
-    errorfile 502 /etc/haproxy/errors/502.http
-    errorfile 503 /etc/haproxy/errors/503.http
-    errorfile 504 /etc/haproxy/errors/504.http
+    server_name _;
 
-frontend http_front
-    bind *:80
-    default_backend http_back
+    add_header X-Served-By \$hostname;
 
-backend http_back
-    balance roundrobin
-    server web-01  <WEB_01_PRIVATE_IP>:80 check
-    server web-02  <WEB_02_PRIVATE_IP>:80 check
-EOF'
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+EOF"
 
-# Restart HAProxy to apply changes
-sudo systemctl restart haproxy
+# Restart nginx to apply changes
+sudo systemctl restart nginx
