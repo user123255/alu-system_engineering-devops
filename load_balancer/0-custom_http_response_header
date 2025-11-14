@@ -1,23 +1,32 @@
 #!/usr/bin/env bash
 # 0-custom_http_response_header
-# Configures Nginx to return a custom X-Served-By header automatically detecting the hostname
 
-# Detect hostname automatically (or fallback if hostname can't be changed)
-HOSTNAME=$(hostname 2>/dev/null || echo "web-01")
+# Update packages and install Nginx
+apt-get update -y
+apt-get install -y nginx
 
-# Nginx config path
-NGINX_CONF="/etc/nginx/sites-available/default"
+# Get the hostname
+HOSTNAME=$(hostname)
 
-# Backup config if not already backed up
-[ ! -f "${NGINX_CONF}.bak" ] && cp "$NGINX_CONF" "${NGINX_CONF}.bak"
+# Configure Nginx default site with custom header
+cat <<EOF > /etc/nginx/sites-available/default
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
 
-# Remove any existing X-Served-By lines to prevent duplicates
-sed -i '/add_header X-Served-By/d' "$NGINX_CONF"
+    root /var/www/html;
+    index index.html index.htm;
 
-# Add the header inside the server block
-sed -i "/server_name _;/a \ \ add_header X-Served-By $HOSTNAME always;" "$NGINX_CONF"
+    server_name _;
 
-# Test configuration and reload Nginx
-nginx -t && nginx -s reload
+    add_header X-Served-By $HOSTNAME always;
 
-echo "Custom header X-Served-By set to: $HOSTNAME"
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+EOF
+
+# Restart and enable Nginx
+systemctl restart nginx
+systemctl enable nginx
