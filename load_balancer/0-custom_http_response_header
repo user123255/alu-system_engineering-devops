@@ -1,28 +1,23 @@
 #!/usr/bin/env bash
 # 0-custom_http_response_header
-# Sandbox-friendly Nginx configuration for X-Served-By header
+# Configures Nginx to return a custom X-Served-By header automatically detecting the hostname
 
-# Set your custom server name (simulate hostname)
-# Change to "web-02" for the second instance
-X_SERVED_BY="web-01"
+# Detect hostname automatically (or fallback if hostname can't be changed)
+HOSTNAME=$(hostname 2>/dev/null || echo "web-01")
 
-# Check if Nginx is installed (sandbox often has it pre-installed)
-if ! command -v nginx >/dev/null 2>&1; then
-    echo "Nginx is not installed. Please install Nginx in the sandbox."
-    exit 1
-fi
-
-# Backup default Nginx config
+# Nginx config path
 NGINX_CONF="/etc/nginx/sites-available/default"
-if [ ! -f "${NGINX_CONF}.bak" ]; then
-    cp "$NGINX_CONF" "${NGINX_CONF}.bak"
-fi
 
-# Add the custom header inside the server block
-# Insert after "server_name _;"
-sed -i "/server_name _;/a \ \ add_header X-Served-By $X_SERVED_BY always;" "$NGINX_CONF"
+# Backup config if not already backed up
+[ ! -f "${NGINX_CONF}.bak" ] && cp "$NGINX_CONF" "${NGINX_CONF}.bak"
 
-# Test and reload Nginx
+# Remove any existing X-Served-By lines to prevent duplicates
+sed -i '/add_header X-Served-By/d' "$NGINX_CONF"
+
+# Add the header inside the server block
+sed -i "/server_name _;/a \ \ add_header X-Served-By $HOSTNAME always;" "$NGINX_CONF"
+
+# Test configuration and reload Nginx
 nginx -t && nginx -s reload
 
-echo "Custom header X-Served-By set to: $X_SERVED_BY"
+echo "Custom header X-Served-By set to: $HOSTNAME"
