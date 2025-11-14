@@ -1,30 +1,28 @@
 #!/usr/bin/env bash
 # 0-custom_http_response_header
-# Configure Nginx on a new Ubuntu machine to add X-Served-By header
+# Sandbox-friendly Nginx configuration for X-Served-By header
 
-# Ignore SC2154 for ShellCheck
-# shellcheck disable=SC2154
+# Set your custom server name (simulate hostname)
+# Change to "web-02" for the second instance
+X_SERVED_BY="web-01"
 
-# Update package list and install Nginx
-apt-get update -y
-apt-get install -y nginx
+# Check if Nginx is installed (sandbox often has it pre-installed)
+if ! command -v nginx >/dev/null 2>&1; then
+    echo "Nginx is not installed. Please install Nginx in the sandbox."
+    exit 1
+fi
 
-# Ensure Nginx service is running
-systemctl enable nginx
-systemctl start nginx
+# Backup default Nginx config
+NGINX_CONF="/etc/nginx/sites-available/default"
+if [ ! -f "${NGINX_CONF}.bak" ]; then
+    cp "$NGINX_CONF" "${NGINX_CONF}.bak"
+fi
 
-# Get the hostname of the server
-hostname_value=$(hostname)
+# Add the custom header inside the server block
+# Insert after "server_name _;"
+sed -i "/server_name _;/a \ \ add_header X-Served-By $X_SERVED_BY always;" "$NGINX_CONF"
 
-# Add custom header X-Served-By in the default Nginx configuration
-nginx_conf="/etc/nginx/sites-available/default"
+# Test and reload Nginx
+nginx -t && nginx -s reload
 
-# Backup original configuration
-cp "$nginx_conf" "${nginx_conf}.bak"
-
-# Insert header configuration inside the server block
-# This ensures the header is added to all HTTP responses
-sed -i "/server_name _;/a \ \ add_header X-Served-By $hostname_value;" "$nginx_conf"
-
-# Test Nginx configuration and reload
-nginx -t && systemctl reload nginx
+echo "Custom header X-Served-By set to: $X_SERVED_BY"
