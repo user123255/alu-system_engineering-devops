@@ -1,46 +1,30 @@
 #!/usr/bin/env bash
-# This script configures a new Ubuntu machine to serve HTTP traffic with a custom header
-# The custom header X-Served-By will contain the server's hostname
+# 0-custom_http_response_header
+# Configure Nginx on a new Ubuntu machine to add X-Served-By header
 
-# Update package list and install nginx
-sudo apt-get update -y
-sudo apt-get install -y nginx
+# Ignore SC2154 for ShellCheck
+# shellcheck disable=SC2154
 
-# Configure Nginx to include the custom header with the server's hostname
-CONFIG_FILE="/etc/nginx/sites-available/default"
+# Update package list and install Nginx
+apt-get update -y
+apt-get install -y nginx
 
-# Check if the default file exists and backup if it does
-if [ -f "$CONFIG_FILE" ]; then
-    sudo cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
-fi
+# Ensure Nginx service is running
+systemctl enable nginx
+systemctl start nginx
 
-# Create new configuration with custom header
-sudo bash -c "cat > $CONFIG_FILE << 'EOF'
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+# Get the hostname of the server
+hostname_value=$(hostname)
 
-    root /var/www/html;
-    index index.html index.htm index.nginx-debian.html;
+# Add custom header X-Served-By in the default Nginx configuration
+nginx_conf="/etc/nginx/sites-available/default"
 
-    server_name _;
+# Backup original configuration
+cp "$nginx_conf" "${nginx_conf}.bak"
 
-    location / {
-        # Add custom header with server hostname
-        add_header X-Served-By \$hostname always;
-        try_files \$uri \$uri/ =404;
-    }
-}
-EOF"
+# Insert header configuration inside the server block
+# This ensures the header is added to all HTTP responses
+sed -i "/server_name _;/a \ \ add_header X-Served-By $hostname_value;" "$nginx_conf"
 
-# Ensure the site is enabled
-sudo ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
-
-# Test Nginx configuration
-sudo nginx -t
-
-# Restart Nginx to apply changes
-sudo systemctl restart nginx
-
-# Enable Nginx to start on boot
-sudo systemctl enable nginx
+# Test Nginx configuration and reload
+nginx -t && systemctl reload nginx
