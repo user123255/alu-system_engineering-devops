@@ -20,7 +20,7 @@ echo "<html>
   </body>
 </html>" | sudo tee /var/www/html/index.html
 
-# *** NECESSARY LINE ADDED FOR THE CHECKER ***
+# 🔥 NECESSARY LINE (added)
 echo "Holberton School" | sudo tee /var/www/html/index.html
 
 # Restart Nginx without using systemctl
