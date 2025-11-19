@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+#As script that installs and configures nginx to serve a page containing "Holberton School for the win!"
 
-# Update package list and install nginx
 apt-get update -y
 apt-get install nginx -y
 
