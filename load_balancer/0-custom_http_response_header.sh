@@ -14,7 +14,7 @@ server {
     server_name $HOSTNAME;
 
     location / {
-        add_header X-Served-By "$HOSTNAME";
+        add_header X-Served-By "\$HOSTNAME";
         proxy_pass http://localhost:3000; # Adjust according to your application
     }
 }
@@ -28,4 +28,3 @@ nginx -t
 
 # Restart Nginx to apply changes
 systemctl restart nginx
-
