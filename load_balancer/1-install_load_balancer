@@ -14,3 +14,4 @@ printf %s "listen 6437-web
     server 6187-web-02 54.152.35.0:80 check
 " >> /etc/haproxy/haproxy.cfg
 sudo service haproxy restart
+
