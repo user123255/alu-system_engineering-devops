@@ -41,4 +41,3 @@ service haproxy restart
 # Output required by ALX checker
 echo "web-01"
 echo "web-02"
-
