@@ -1,29 +1,28 @@
 #!/bin/bash
 # 1-run_nginx_as_nginx
-# Configure Nginx to run as nginx user and listen on port 8080
+# Run Nginx as nginx user and listen on port 8080
 
-# Exit immediately if a command fails
 set -e
 
 NGINX_CONF="/etc/nginx/nginx.conf"
 
-# Backup original configuration if not already backed up
+# Backup original config
 [ ! -f "${NGINX_CONF}.bak" ] && cp "$NGINX_CONF" "${NGINX_CONF}.bak"
 
-# Set Nginx to run as the nginx user
+# Ensure nginx runs as nginx user
 sed -i 's/^user .*/user nginx;/' "$NGINX_CONF"
 
-# Configure Nginx to listen on port 8080 on all IPs
+# Set Nginx to listen on port 8080
 sed -i 's/listen 80 default_server;/listen 8080 default_server;/' "$NGINX_CONF"
 sed -i 's/listen \[::\]:80 default_server;/listen [::]:8080 default_server;/' "$NGINX_CONF"
 
-# Start Nginx if not running, else reload
+# Start Nginx if not running
 if ! pgrep nginx >/dev/null 2>&1; then
     nginx
 else
     nginx -s reload
 fi
 
-# Print Nginx processes (master + workers) to verify
-pgrep -a nginx
+# Explicitly print Nginx master and worker processes
+ps aux | grep '[n]ginx'
 
