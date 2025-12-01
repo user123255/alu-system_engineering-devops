@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
-# This script installs and starts Apache, then creates a webpage with "Hello Holberton"
+# Fix Apache inside container
 
-# Install Apache
-apt-get update
+apt-get update -y
 apt-get install -y apache2
 
-# Start Apache service
 service apache2 start
 
-# Create the webpage
-echo "Hello Holberton" > /var/www/html/index.html
+# Confirm Apache is running
+if pgrep apache2 > /dev/null; then
+    echo "apache2 is running"
+fi
+
+# Create the required page
+echo "Hello Holberton" | tee /var/www/html/index.html
+
