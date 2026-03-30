@@ -1,19 +1,16 @@
 #!/usr/bin/env bash
-# Install nginx if not installed
-apt-get update -y
-apt-get install -y nginx
+# 0-nginx_likes_port_80
 
-# Create the HTML root and page
-mkdir -p /usr/share/nginx/html
-echo "Hello Holberton" > /usr/share/nginx/html/index.html
+# Stop any process (like haproxy) that might be using port 80
+sudo systemctl stop haproxy 2>/dev/null
+sudo pkill -f nginx 2>/dev/null
 
-# Remove stale PID
-rm -f /run/nginx.pid
+# Remove nginx PID file if it exists
+sudo rm -f /run/nginx.pid
 
-# Start Nginx
-nginx
+# Update main nginx.conf to listen on port 80 instead of 8080
+sudo sed -i 's/listen \[::\]:8080;/listen [::]:80;/' /etc/nginx/nginx.conf
 
-# Wait until port 80 is open
-while ! nc -z 127.0.0.1 80; do
-    sleep 1
-done
+# Reload or start nginx
+sudo nginx -t  # Test configuration
+sudo systemctl restart nginx 2>/dev/null || sudo nginx
