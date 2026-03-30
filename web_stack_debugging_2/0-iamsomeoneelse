@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Run whoami as another user
+
+if [ $# -ne 1 ]; then
+    exit 1
+fi
+
+if ! id "$1" >/dev/null 2>&1; then
+    exit 1
+fi
+
+sudo -n -u "$1" whoami
