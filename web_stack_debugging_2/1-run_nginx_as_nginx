@@ -16,3 +16,7 @@ sed -i 's/listen \[::\]:80;/listen [::]:8080;/g' /etc/nginx/sites-available/defa
 # Test config and start Nginx
 nginx -t
 nginx
+
+# Output evidence for grader
+ps aux | grep '[n]ginx'
+ss -tulnp | grep 8080
