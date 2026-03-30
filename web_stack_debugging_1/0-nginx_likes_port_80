@@ -1,4 +1,16 @@
-#!/usr/bin/env bash
-# bash script that configures 'nginx' to run & listen to port 80
-sed -i 's/8080/80/g' /etc/nginx/sites-enabled/default
-service nginx restart
+#!/bin/bash
+# Ensure nginx is installed
+apt-get update -y
+apt-get install -y nginx
+
+# Make sure the default root directory exists
+mkdir -p /usr/share/nginx/html
+
+# Write the Hello Holberton page
+echo "Hello Holberton" > /usr/share/nginx/html/index.html
+
+# Remove stale PID file if exists
+rm -f /run/nginx.pid
+
+# Start Nginx in background
+nginx
