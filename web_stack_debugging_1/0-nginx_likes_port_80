@@ -1,16 +1,19 @@
-#!/usr/bin/env bash
-# Ensure nginx is installed
+#!/bin/bash
+# Install nginx if not installed
 apt-get update -y
 apt-get install -y nginx
 
-# Make sure the default root directory exists
+# Create the HTML root and page
 mkdir -p /usr/share/nginx/html
-
-# Write the Hello Holberton page
 echo "Hello Holberton" > /usr/share/nginx/html/index.html
 
-# Remove stale PID file if exists
+# Remove stale PID
 rm -f /run/nginx.pid
 
-# Start Nginx in background
+# Start Nginx
 nginx
+
+# Wait until port 80 is open
+while ! nc -z 127.0.0.1 80; do
+    sleep 1
+done
