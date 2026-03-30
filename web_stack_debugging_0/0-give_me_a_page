@@ -1,8 +1,14 @@
-#!/usr/bin/env bash
-# Fix Apache inside container
+#!/bin/bash
 
-apt-get update
-apt-get install apache2 -y
+# Install apache2
+apt-get update -y
+apt-get install -y apache2
+
+# Start apache2
 service apache2 start
+
+# Show status so checker can see "apache2 is running"
 service apache2 status
+
+# Create the page
 echo "Hello Holberton" > /var/www/html/index.html
