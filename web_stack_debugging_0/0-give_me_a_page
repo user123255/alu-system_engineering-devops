@@ -1,15 +1,8 @@
 #!/usr/bin/env bash
 # Fix Apache inside container
 
-apt-get update -y
-apt-get install -y apache2
-
+apt-get update
+apt-get install apache2 -y
 service apache2 start
-
-# Confirm Apache is running
-if pgrep apache2 > /dev/null; then
-    echo "apache2 is running"
-fi
-
-# Create the required page
-echo "Hello Holberton" | tee /var/www/html/index.html
+service apache2 status
+echo "Hello Holberton" > /var/www/html/index.html
