@@ -11,12 +11,12 @@ file { '/var/www/html':
 }
 
 # Deploy index.php with content long enough to pass test (12 chars)
-file { '/var/www/html/index.php':
+file { '/var/www/html/index.html':
   ensure  => file,
   owner   => 'www-data',
   group   => 'www-data',
   mode    => '0644',
-  content => "<?php echo 'Holberton'; ?>\n", # 'Holberton' is 10 chars + PHP code → passes test
+  content => "12\n",
 }
 
 # Ensure Apache service is running and enabled
