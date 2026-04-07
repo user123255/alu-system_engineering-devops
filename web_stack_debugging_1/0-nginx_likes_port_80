@@ -1,9 +1,23 @@
 #!/usr/bin/env bash
-# Install and start nginx to listen on port 80
+# Script that ensures Nginx is installed and listening on port 80
 
-sudo apt-get update -y >/dev/null 2>&1
-sudo apt-get install -y nginx >/dev/null 2>&1
-sudo systemctl start nginx
-sudo systemctl enable nginx
+# Stop Apache if running
+if systemctl is-active --quiet apache2; then
+    systemctl stop apache2
+    systemctl disable apache2
+fi
 
+# Install Nginx if not installed
+apt update -y
+apt install -y nginx
+
+# Ensure default site listens on port 80
+sed -i 's/listen 8080 default_server;/listen 80 default_server;/g' /etc/nginx/sites-enabled/default
+sed -i 's/listen \[::\]:8080 default_server;/listen [::]:80 default_server;/g' /etc/nginx/sites-enabled/default
+
+# Restart Nginx to apply changes
+systemctl restart nginx
+systemctl enable nginx
+
+# Exit with 2 as required
 exit 2
