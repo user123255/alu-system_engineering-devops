@@ -1,16 +1,12 @@
 #!/usr/bin/env bash
-# 0-nginx_likes_port_80
+# This script ensures Nginx is installed, running, and listening on port 80
 
-# Stop any process (like haproxy) that might be using port 80
-sudo systemctl stop haproxy 2>/dev/null
-sudo pkill -f nginx 2>/dev/null
+# Update package index and install nginx if not installed
+apt-get update -y
+apt-get install -y nginx
 
-# Remove nginx PID file if it exists
-sudo rm -f /run/nginx.pid
+# Start Nginx service
+systemctl start nginx
 
-# Update main nginx.conf to listen on port 80 instead of 8080
-sudo sed -i 's/listen \[::\]:8080;/listen [::]:80;/' /etc/nginx/nginx.conf
-
-# Reload or start nginx
-sudo nginx -t  # Test configuration
-sudo systemctl restart nginx 2>/dev/null || sudo nginx
+# Enable Nginx to start on boot
+systemctl enable nginx
