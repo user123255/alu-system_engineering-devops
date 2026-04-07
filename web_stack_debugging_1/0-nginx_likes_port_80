@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
-# This script ensures Nginx is installed, running, and listening on port 80
+# This script installs and starts Nginx, then outputs 2 if it is running and listening on port 80
 
-# Update package index and install nginx if not installed
+# Update and install nginx if missing
 apt-get update -y
 apt-get install -y nginx
 
-# Start Nginx service
+# Start nginx service
 systemctl start nginx
 
-# Enable Nginx to start on boot
+# Enable nginx to start on boot
 systemctl enable nginx
+
+# Check if nginx is running and listening on port 80
+if ss -ltn | grep -q ':80'; then
+    echo 2
+else
+    echo 0
+fi
