@@ -1,5 +1,5 @@
 # 0-the_sky_is_the_limit_not.pp
-# Puppet manifest to fix Nginx web stack for high concurrency lab
+# Puppet manifest to fix Nginx web stack to handle 100 concurrent requests out of 1000+ without failing
 
 # Stop Apache if it's running (to free port 80)
 service { 'apache2':
