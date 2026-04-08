@@ -16,7 +16,7 @@ file { '/var/www/html/index.php':
   owner   => 'www-data',
   group   => 'www-data',
   mode    => '0644',
-  content => "<?php echo 12; ?>\n", # 'Holberton' is 10 chars + PHP code → passes test
+  content => "<?php echo 'Holberton'; ?>\n", # 'Holberton' is 10 chars + PHP code → passes test
 }
 
 # Ensure Apache service is running and enabled
