@@ -1,4 +1,3 @@
-
 # 0-the_sky_is_the_limit_not.pp
 # Puppet manifest to fix Nginx web stack for high concurrency lab
 
@@ -62,5 +61,3 @@ service { 'nginx':
   ensure    => running,
   enable    => true,
   subscribe => [File['/var/www/html'], File['/etc/nginx/nginx.conf']],
-}
-
