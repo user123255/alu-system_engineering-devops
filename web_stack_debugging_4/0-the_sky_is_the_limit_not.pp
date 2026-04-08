@@ -70,4 +70,4 @@ service { 'nginx':
   enable  => true,
   require => Package['nginx'],
 }
-notify { '0': }
+
