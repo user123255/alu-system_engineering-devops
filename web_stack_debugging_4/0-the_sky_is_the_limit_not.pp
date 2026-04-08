@@ -39,6 +39,7 @@ file { '/etc/nginx/nginx.conf':
   group   => 'root',
   mode    => '0644',
   content => @(END),
+user www-data;
 worker_processes auto;
 events {
     worker_connections 1024;
