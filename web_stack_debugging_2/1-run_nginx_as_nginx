@@ -1,15 +1,22 @@
 #!/bin/bash
-# This script configures Nginx to run as nginx user and listen on port 8080
+# Configure Nginx to run as nginx user and listen on port 8080
 
-# Update nginx user in config
+# Create web root if missing
+mkdir -p /var/www/html
+chown -R nginx:nginx /var/www/html
+
+# Ensure index.html exists
+echo "<h1>Welcome to Nginx!</h1>" > /var/www/html/index.html
+chown nginx:nginx /var/www/html/index.html
+
+# Set nginx user and listening port in main config
 sed -i 's/^user .*/user nginx;/' /etc/nginx/nginx.conf
-
-# Change listening port to 8080 in default site
 sed -i 's/listen 80;/listen 8080;/' /etc/nginx/sites-available/default
 sed -i 's/listen \[::\]:80;/listen [::]:8080;/' /etc/nginx/sites-available/default
 
-# Ensure web root is owned by nginx
-chown -R nginx:nginx /var/www/html
+# Stop Nginx if running
+pkill -f nginx
 
-# Restart Nginx to apply changes
-service nginx restart
+# Start Nginx as nginx user in foreground (daemon off)
+sudo -u nginx nginx -g 'daemon off;' &
+sleep 2
