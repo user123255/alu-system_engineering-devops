@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#Script to run Nginx as nginx user on port 8080
 set -e
 
 # Ensure nginx user exists
