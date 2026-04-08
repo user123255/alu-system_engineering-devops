@@ -1,6 +1,7 @@
 # 0-the_sky_is_the_limit_not.pp
 # Puppet manifest to fix Nginx web stack to handle 100 concurrent requests without failing
 
+
 # Stop Apache if it's running (to free port 80)
 service { 'apache2':
   ensure => stopped,
@@ -69,3 +70,4 @@ service { 'nginx':
   enable  => true,
   require => Package['nginx'],
 }
+notify { '0': }
