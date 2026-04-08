@@ -1,21 +1,24 @@
 # 0-the_sky_is_the_limit_not.pp
-# Puppet manifest to fix Nginx web stack for high concurrency
+# Puppet manifest to fix Nginx web stack for high concurrency lab
 
-# Stop Apache if it's running
+# Stop Apache if it's running (to free port 80)
 service { 'apache2':
   ensure => stopped,
   enable => false,
 }
 
-# Ensure web root exists
+# Ensure /var/www/html exists and is clean
 file { '/var/www/html':
   ensure  => directory,
   owner   => 'www-data',
   group   => 'www-data',
+  recurse => true,
+  purge   => true,
+  force   => true,
   mode    => '0755',
 }
 
-# Ensure index file exists
+# Ensure index.html exists with content
 file { '/var/www/html/index.html':
   ensure  => file,
   owner   => 'www-data',
@@ -29,12 +32,7 @@ package { 'nginx':
   ensure => installed,
 }
 
-# Increase system file limits (IMPORTANT)
-exec { 'increase_ulimit':
-  command => '/bin/sh -c "ulimit -n 65535"',
-}
-
-# Optimized Nginx config
+# Configure Nginx for high concurrency
 file { '/etc/nginx/nginx.conf':
   ensure  => file,
   owner   => 'root',
@@ -42,33 +40,25 @@ file { '/etc/nginx/nginx.conf':
   mode    => '0644',
   content => @(END),
 worker_processes auto;
-worker_rlimit_nofile 65535;
-
 events {
-    worker_connections 4096;
-    multi_accept on;
+    worker_connections 1024;
 }
-
 http {
-    sendfile on;
-    tcp_nopush on;
-    tcp_nodelay on;
-    keepalive_timeout 65;
-    types_hash_max_size 2048;
-
     server {
         listen 80;
         root /var/www/html;
         index index.html;
     }
+    keepalive_timeout 65;
+    gzip on;
 }
 END
   notify => Service['nginx'],
 }
 
-# Ensure Nginx is running
+# Ensure Nginx is running and enabled
 service { 'nginx':
   ensure    => running,
   enable    => true,
-  subscribe => File['/etc/nginx/nginx.conf'],
+  subscribe => [File['/var/www/html'], File['/etc/nginx/nginx.conf']],
 }
