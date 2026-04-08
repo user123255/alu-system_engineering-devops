@@ -26,3 +26,5 @@ rm -f /run/nginx.pid
 
 # Start Nginx in the foreground
 nginx -g "daemon off;"
+
+echo "nginx"
