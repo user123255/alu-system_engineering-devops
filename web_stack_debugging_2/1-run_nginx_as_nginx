@@ -3,15 +3,21 @@
 # Ensure nginx user exists
 id nginx || useradd -r nginx
 
-# Set nginx user
+# Fix nginx user
 sed -i 's/^user .*/user nginx;/' /etc/nginx/nginx.conf
 
-# Set port to 8080
+# Fix PID file issue (CRITICAL)
+sed -i 's|^pid .*|pid /tmp/nginx.pid;|' /etc/nginx/nginx.conf
+
+# Fix port 8080
 sed -i 's/listen 80 default_server;/listen 8080 default_server;/' /etc/nginx/sites-available/default
 sed -i 's/listen \[::\]:80 default_server;/listen [::]:8080 default_server;/' /etc/nginx/sites-available/default
 
 # Stop nginx completely
 pkill nginx || true
 
-# Start nginx properly
+# Validate config (IMPORTANT)
+nginx -t || exit 1
+
+# START nginx (IMPORTANT: no sudo, no service)
 nginx
