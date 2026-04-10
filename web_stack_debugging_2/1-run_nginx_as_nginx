@@ -1,17 +1,16 @@
-#!/bin/bash
-# Configure Nginx to run as nginx user and listen on port 8080
-
+#!/usr/bin/env bash
+# Script to run Nginx as nginx user on port 8080
 # Ensure nginx user exists
 id nginx || useradd -r nginx
 
-# Set nginx to run workers as nginx
+# Set nginx user
 sed -i 's/^user .*/user nginx;/' /etc/nginx/nginx.conf
 
-# Change port to 8080
+# Set port to 8080
 sed -i 's/listen 80 default_server;/listen 8080 default_server;/' /etc/nginx/sites-available/default
 sed -i 's/listen \[::\]:80 default_server;/listen [::]:8080 default_server;/' /etc/nginx/sites-available/default
 
-# Stop nginx
+# Stop nginx completely
 pkill nginx || true
 
 # Start nginx properly
