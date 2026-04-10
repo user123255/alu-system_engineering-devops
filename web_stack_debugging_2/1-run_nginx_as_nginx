@@ -1,22 +1,23 @@
 #!/bin/bash
 # Configure Nginx to run as nginx user and listen on port 8080
 
-# Create web root if missing
-mkdir -p /var/www/html
-chown -R nginx:nginx /var/www/html
+# Ensure nginx user exists
+id nginx || sudo useradd -r nginx
 
-# Ensure index.html exists
-echo "<h1>Welcome to Nginx!</h1>" > /var/www/html/index.html
-chown nginx:nginx /var/www/html/index.html
+# Set nginx user
+sudo sed -i 's/^user .*/user nginx;/' /etc/nginx/nginx.conf
 
-# Set nginx user and listening port in main config
-sed -i 's/^user .*/user nginx;/' /etc/nginx/nginx.conf
-sed -i 's/listen 80;/listen 8080;/' /etc/nginx/sites-available/default
-sed -i 's/listen \[::\]:80;/listen [::]:8080;/' /etc/nginx/sites-available/default
+# Change port
+sudo sed -i 's/listen 80 default_server;/listen 8080 default_server;/' /etc/nginx/sites-available/default
+sudo sed -i 's/listen \[::\]:80 default_server;/listen [::]:8080 default_server;/' /etc/nginx/sites-available/default
 
-# Stop Nginx if running
-pkill -f nginx
+# Fix permissions
+sudo chown -R nginx:nginx /var/log/nginx
+sudo chown -R nginx:nginx /var/lib/nginx
+sudo chown -R nginx:nginx /var/www/html
 
-# Start Nginx as nginx user in foreground (daemon off)
-sudo -u nginx nginx -g 'daemon off;' &
-sleep 2
+# Stop nginx
+sudo pkill nginx || true
+
+# Start nginx as nginx user
+sudo -u nginx nginx
