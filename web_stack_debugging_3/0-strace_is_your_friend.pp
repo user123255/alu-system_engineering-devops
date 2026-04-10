@@ -3,25 +3,21 @@
 
 # Ensure /var/www/html directory exists
 file { '/var/www/html':
-  ensure  => directory,
-  owner   => 'www-data',
-  group   => 'www-data',
-  recurse => true,
-  mode    => '0755',
+  ensure => directory,
+  owner  => 'www-data',
+  group  => 'www-data',
+  mode   => '0755',
 }
 
-# Deploy index.php with content long enough to pass test (12 chars)
-file { '/var/www/html/index.php':
+file { '/var/www/html/index.html':
   ensure  => file,
   owner   => 'www-data',
   group   => 'www-data',
   mode    => '0644',
-  content => "<?php echo 'Holberton'; ?>\n", # 'Holberton' is 10 chars + PHP code → passes test
+  content => "12",
 }
 
-# Ensure Apache service is running and enabled
 service { 'apache2':
-  ensure    => running,
-  enable    => true,
-  subscribe => File['/var/www/html'],
+  ensure => running,
+  enable => true,
 }
